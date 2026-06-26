@@ -787,6 +787,11 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
 // App Startup
 initTable();
 // Initialize Auth State Listener
+firebaseAuth.getRedirectResult().catch(err => {
+  console.error("Mobile redirect error:", err);
+  alert("Login Error: " + err.message);
+});
+
 firebaseAuth.onAuthStateChanged(user => {
   if (authLoadingOverlay) authLoadingOverlay.classList.add('opacity-0', 'pointer-events-none');
   
