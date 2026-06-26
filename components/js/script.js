@@ -200,18 +200,18 @@ function initTable() {
     row.dataset.portion = portion;
     row.className = 'data-row transition-colors group';
     row.innerHTML = `
-      <td class="py-3 px-6 text-center">
+      <td class="py-3 px-2 md:px-6 text-center">
         <input type="radio" name="targetPortion" class="target-radio form-radio text-brand rounded-full border-transparent focus:ring-brand focus:ring-offset-surface-container-low h-5 w-5 cursor-pointer radio-neu" value="${portion}" ${portion === portions[0] ? 'checked' : ''}>
       </td>
-      <td class="py-3 px-6 text-body-md font-semibold text-on-surface">${portion}</td>
-      <td class="py-3 px-6">
+      <td class="py-3 px-2 md:px-6 text-body-md font-semibold text-on-surface">${portion}</td>
+      <td class="py-3 px-2 md:px-6">
         <div class="flex items-center justify-center gap-3">
           <button class="counter-btn minus w-10 h-10 rounded-xl bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors neu-shadow-sm active:neu-shadow-inset-sm"><span class="material-symbols-outlined text-sm pointer-events-none">remove</span></button>
-          <input type="number" class="counter-input w-16 h-12 bg-surface-container-high rounded-xl text-center text-[20px] text-on-surface font-bold neu-shadow-inset" value="0" min="0" data-portion="${portion}">
+          <input type="number" class="counter-input w-16 h-12 bg-surface-container-high rounded-xl text-center text-[20px] text-on-surface font-bold neu-shadow-inset border-transparent border" value="0" min="0" data-portion="${portion}">
           <button class="counter-btn plus w-10 h-10 rounded-xl bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors neu-shadow-sm active:neu-shadow-inset-sm"><span class="material-symbols-outlined text-sm pointer-events-none">add</span></button>
         </div>
       </td>
-      <td class="row-total py-3 px-6 text-right text-body-md text-brand font-semibold">0</td>
+      <td class="row-total py-3 px-2 md:px-6 text-right text-body-md text-brand font-semibold">0</td>
     `;
     tableBody.appendChild(row);
   });
