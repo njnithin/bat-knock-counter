@@ -404,7 +404,7 @@ async function loadData() {
   try {
     setStatus('Loading...', 'bg-orange-400');
     
-    const res = await fetch('http://localhost:3000/api/data');
+    const res = await fetch('/api/data');
     if (res.ok) {
       const data = await res.json();
       if (data && data.bats) {
@@ -445,7 +445,7 @@ async function saveData() {
   setStatus('Saving...', 'bg-orange-400');
   
   try {
-    const res = await fetch('http://localhost:3000/api/data', {
+    const res = await fetch('/api/data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(appData)
