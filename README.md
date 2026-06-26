@@ -33,7 +33,6 @@ This application is built for cricket bat makers, players, or enthusiasts who wa
   - **Mega Golden Confetti**: If every single portion on the bat reaches the 10,000 knock milestone, a massive golden confetti celebration will cover the entire screen!
 
 ### 5. 📤 Export Capabilities
-- **Export to Image (`.png`)**: Save a beautiful snapshot of your bat's current knock table.
 - **Export to PDF (`.pdf`)**: Generate a clean, styled PDF document summarizing all knocks.
 - **Export to Excel (`.xlsx`)**: Export the raw data into an Excel spreadsheet for your own record keeping or analysis.
 

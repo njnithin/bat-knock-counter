@@ -11,7 +11,6 @@ const batTabsContainer = document.getElementById('batTabs');
 const addBatBtn = document.getElementById('addBatBtn');
 const resetBatBtn = document.getElementById('resetBatBtn');
 const lockBatBtn = document.getElementById('lockBatBtn');
-const exportImageBtn = document.getElementById('exportImageBtn');
 const exportPdfBtn = document.getElementById('exportPdfBtn');
 const exportExcelBtn = document.getElementById('exportExcelBtn');
 const grandTotalEl = document.getElementById('grandTotal');
@@ -627,51 +626,6 @@ lockBatBtn.addEventListener('click', () => {
   renderTabs(); // Refresh the tab lock icons
   triggerSave();
 });
-
-exportImageBtn.addEventListener('click', () => {
-  const wrapper = document.querySelector('.table-wrapper');
-  if (!wrapper) {
-    alert("Error: Table wrapper not found");
-    return;
-  }
-  
-  const inputs = wrapper.querySelectorAll('input.counter-input');
-  
-  // Swap inputs to divs to avoid html2canvas rendering bugs with inset shadows and input paddings
-  const swaps = [];
-  inputs.forEach(input => {
-    const div = document.createElement('div');
-    // Copy the classes but remove the problematic neumorphic inset shadow just for the screenshot
-    div.className = input.className.replace('neu-shadow-inset', '') + ' flex items-center justify-center';
-    div.textContent = input.value;
-    input.style.display = 'none';
-    input.parentNode.insertBefore(div, input);
-    swaps.push({ input, div });
-  });
-
-  htmlToImage.toPng(wrapper, { 
-    backgroundColor: getComputedStyle(document.body).backgroundColor
-  }).then(dataUrl => {
-    // Revert the DOM
-    swaps.forEach(swap => {
-      swap.input.style.display = '';
-      swap.div.remove();
-    });
-    
-    const link = document.createElement('a');
-    link.download = `Bat_Knocks_${(appData.lastEdited || 'Default').replace(/\s+/g, '_')}.png`;
-    link.href = dataUrl;
-    link.click();
-  }).catch(err => {
-    console.error("html-to-image error:", err);
-    alert("Failed to export image: " + err.message);
-    swaps.forEach(swap => {
-      swap.input.style.display = '';
-      swap.div.remove();
-    });
-  });
-});
-
 exportPdfBtn.addEventListener('click', () => {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
