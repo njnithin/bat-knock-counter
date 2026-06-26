@@ -1,0 +1,119 @@
+/* Bat Knock Counter - Lumix Edition */
+
+:root {
+  --brand: #3b7df0; /* Vibrant Neumorphic Blue */
+  --brand-contrast: #ffffff;
+  --surface-container: #e0e5ec;
+  --primary-container: #d4ff37;
+  --surface-dim: #e0e5ec;
+  --surface: #e0e5ec;
+  --error: #ba1a1a;
+  --surface-container-high: #e0e5ec;
+  --surface-container-low: #e0e5ec;
+  --on-surface-variant: #4a5568;
+  --surface-container-lowest: #e0e5ec;
+  --surface-variant: #e0e5ec;
+  --background: #e0e5ec;
+  --primary: #3b7df0;
+  --outline-variant: transparent;
+  --on-surface: #2d3748;
+  --outline: transparent;
+
+  /* Neumorphic Shadows */
+  --neu-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.7);
+  --neu-shadow-sm: 4px 4px 8px rgba(163, 177, 198, 0.6), -4px -4px 8px rgba(255, 255, 255, 0.7);
+  --neu-shadow-inset: inset 6px 6px 10px 0 rgba(163, 177, 198, 0.7), inset -6px -6px 10px 0 rgba(255, 255, 255, 0.8);
+  --neu-shadow-inset-sm: inset 3px 3px 6px 0 rgba(163, 177, 198, 0.7), inset -3px -3px 6px 0 rgba(255, 255, 255, 0.8);
+}
+
+.dark {
+  --brand: #d4ff37;
+  --brand-contrast: #121317;
+  --surface-container: #1e1f23;
+  --primary-container: #c8f328;
+  --surface-dim: #121317;
+  --surface: #121317;
+  --error: #ffb4ab;
+  --surface-container-high: #292a2e;
+  --surface-container-low: #1a1b1f;
+  --on-surface-variant: #c5c9ae;
+  --surface-container-lowest: #0d0e12;
+  --surface-variant: #343539;
+  --background: #121317;
+  --primary: #ffffff;
+  --outline-variant: #444934;
+  --on-surface: #e3e2e7;
+  --outline: #8f937a;
+
+  /* Lumix Dark Mode Fallbacks */
+  --neu-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  --neu-shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --neu-shadow-inset: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  --neu-shadow-inset-sm: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Neumorphic Shadow Utility Classes */
+.neu-shadow { box-shadow: var(--neu-shadow) !important; }
+.neu-shadow-sm { box-shadow: var(--neu-shadow-sm) !important; }
+.neu-shadow-inset { box-shadow: var(--neu-shadow-inset) !important; }
+.neu-shadow-inset-sm { box-shadow: var(--neu-shadow-inset-sm) !important; }
+
+/* Active states for neumorphic buttons */
+.active\:neu-shadow-inset:active { box-shadow: var(--neu-shadow-inset) !important; }
+.active\:neu-shadow-inset-sm:active { box-shadow: var(--neu-shadow-inset-sm) !important; }
+
+/* Knock Flash Animation */
+@keyframes knockFlash {
+  0% { background-color: rgba(212, 255, 55, 0.4); }
+  100% { background-color: transparent; }
+}
+
+.knock-flash {
+  animation: knockFlash 0.5s ease-out;
+}
+
+/* Modal animations */
+.modal-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.modal-overlay:not(.hidden) {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal-overlay.hidden #muscleModalContent {
+  transform: scale(0.9);
+}
+.modal-overlay:not(.hidden) #muscleModalContent {
+  transform: scale(1);
+}
+
+/* Remove arrows from number input */
+.live-knock-input::-webkit-outer-spin-button,
+.live-knock-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.live-knock-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.counter-input::-webkit-outer-spin-button,
+.counter-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.counter-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Locked mode styles */
+.locked-mode table {
+  opacity: 0.4;
+  filter: grayscale(100%);
+  pointer-events: none;
+}
+
+table {
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}

@@ -1,0 +1,40 @@
+{
+  "lastEdited": "Test",
+  "bats": {
+    "MRF-Muscle": {
+      "1L": 2,
+      "1M": 1,
+      "1R": 1,
+      "2L": 0,
+      "2M": 0,
+      "2R": 0,
+      "3L": 0,
+      "3M": 0,
+      "3R": 0,
+      "4L": 0,
+      "4M": 0,
+      "4R": 0,
+      "1L_partial": 28,
+      "1M_partial": 11,
+      "_lastGrandTotal": 4000
+    },
+    "Test": {
+      "1L": 10,
+      "1M": 10,
+      "1R": 10,
+      "2L": 10,
+      "2M": 10,
+      "2R": 10,
+      "3L": 10,
+      "3M": 10,
+      "3R": 10,
+      "4L": 10,
+      "4M": 10,
+      "4R": 10,
+      "_lastGrandTotal": 120000
+    }
+  },
+  "lockedBats": {
+    "MRF-Muscle": true
+  }
+}
