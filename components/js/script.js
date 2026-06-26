@@ -432,11 +432,36 @@ lockBatBtn.addEventListener('click', () => {
 
 exportImageBtn.addEventListener('click', () => {
   const wrapper = document.querySelector('.table-wrapper');
+  const inputs = wrapper.querySelectorAll('input.counter-input');
+  
+  // Swap inputs to divs to avoid html2canvas rendering bugs with inset shadows and input paddings
+  const swaps = [];
+  inputs.forEach(input => {
+    const div = document.createElement('div');
+    // Copy the classes but remove the problematic neumorphic inset shadow just for the screenshot
+    div.className = input.className.replace('neu-shadow-inset', '') + ' flex items-center justify-center';
+    div.textContent = input.value;
+    input.style.display = 'none';
+    input.parentNode.insertBefore(div, input);
+    swaps.push({ input, div });
+  });
+
   html2canvas(wrapper, { backgroundColor: getComputedStyle(document.body).backgroundColor }).then(canvas => {
+    // Revert the DOM
+    swaps.forEach(swap => {
+      swap.input.style.display = '';
+      swap.div.remove();
+    });
+    
     const link = document.createElement('a');
     link.download = `Bat_Knocks_${appData.lastEdited.replace(/\s+/g, '_')}.png`;
     link.href = canvas.toDataURL();
     link.click();
+  }).catch(err => {
+    swaps.forEach(swap => {
+      swap.input.style.display = '';
+      swap.div.remove();
+    });
   });
 });
 

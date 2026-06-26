@@ -91,15 +91,24 @@
 
           <!-- Custom Theme Dropdown -->
           <div class="relative hidden md:block" id="customThemeSelector">
-            <button type="button" id="themeSelectorBtn" class="flex items-center gap-1 bg-transparent border-none outline-none text-sm font-semibold text-on-surface-variant hover:text-on-surface cursor-pointer focus:outline-none">
+            <button type="button" id="themeSelectorBtn"
+              class="flex items-center gap-1 bg-transparent border-none outline-none text-sm font-semibold text-on-surface-variant hover:text-on-surface cursor-pointer focus:outline-none">
               <span id="themeSelectorLabel">System Theme</span>
-              <span class="material-symbols-outlined text-sm pointer-events-none transition-transform duration-200" id="themeSelectorArrow">expand_more</span>
+              <span class="material-symbols-outlined text-sm pointer-events-none transition-transform duration-200"
+                id="themeSelectorArrow">expand_more</span>
             </button>
-            
-            <div id="themeDropdownMenu" class="absolute right-0 top-full mt-3 w-40 origin-top-right rounded-2xl bg-surface-container-high neu-shadow-sm flex-col p-1.5 border border-transparent opacity-0 pointer-events-none transform scale-95 transition-all duration-200 z-[100]">
-              <button type="button" class="theme-option w-full text-left px-4 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface hover:text-brand hover:neu-shadow-inset-sm rounded-xl transition-all mb-1" data-value="system">System Theme</button>
-              <button type="button" class="theme-option w-full text-left px-4 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface hover:text-brand hover:neu-shadow-inset-sm rounded-xl transition-all mb-1" data-value="dark">Dark Theme</button>
-              <button type="button" class="theme-option w-full text-left px-4 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface hover:text-brand hover:neu-shadow-inset-sm rounded-xl transition-all" data-value="light">Light Theme</button>
+
+            <div id="themeDropdownMenu"
+              class="absolute right-0 top-full mt-3 w-40 origin-top-right rounded-2xl bg-surface-container-high neu-shadow-sm flex-col p-1.5 border border-transparent opacity-0 pointer-events-none transform scale-95 transition-all duration-200 z-[100]">
+              <button type="button"
+                class="theme-option w-full text-left px-4 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface hover:text-brand hover:neu-shadow-inset-sm rounded-xl transition-all mb-1"
+                data-value="system">System Theme</button>
+              <button type="button"
+                class="theme-option w-full text-left px-4 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface hover:text-brand hover:neu-shadow-inset-sm rounded-xl transition-all mb-1"
+                data-value="dark">Dark Theme</button>
+              <button type="button"
+                class="theme-option w-full text-left px-4 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface hover:text-brand hover:neu-shadow-inset-sm rounded-xl transition-all"
+                data-value="light">Light Theme</button>
             </div>
           </div>
         </div>
@@ -162,13 +171,13 @@
               <input id="autoSwitchToggle"
                 class="form-checkbox text-brand rounded bg-surface-container border-transparent focus:ring-brand focus:ring-offset-surface-container-low neu-shadow-inset-sm"
                 type="checkbox" />
-              <span class="text-sm font-semibold text-on-surface">Auto-Switch</span>
+              <span class="text-sm font-semibold text-on-surface">Auto-Switch Portion</span>
             </label>
             <div class="flex items-center gap-3">
               <span class="text-sm font-semibold text-on-surface-variant uppercase">Sens:</span>
               <input id="micSensitivity"
-                class="w-24 h-3 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-brand neu-shadow-inset-sm" max="100"
-                min="1" type="range" value="50" />
+                class="w-24 h-3 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-brand neu-shadow-inset-sm"
+                max="100" min="1" type="range" value="50" />
 
               <input type="number" id="liveKnockCount"
                 class="w-16 h-10 bg-surface-container-high rounded-xl text-center text-brand font-bold hidden px-1 py-1 neu-shadow-inset border-transparent border"
