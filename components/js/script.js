@@ -500,7 +500,7 @@ async function saveData() {
   
   try {
     lastSaveTime = Date.now();
-    await firebaseDb.collection('users').doc(currentUser.uid).set(appData, { merge: true });
+    await firebaseDb.collection('users').doc(currentUser.uid).set(appData);
     setTimeout(() => setStatus('Cloud Sync', 'bg-brand'), 500);
   } catch (error) {
     console.error('Error saving data:', error);
