@@ -48,6 +48,15 @@ function checkMuscles(input) {
       fireGoldenConfetti();
     } else {
       muscleMessage.textContent = `${portion} reached ${totalKnocks.toLocaleString()} knocks!`;
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ['#d4ff37', '#ffffff', '#4c8c2b'],
+          zIndex: 9999
+        });
+      }
     }
     
     const modalContent = document.getElementById('muscleModalContent');
@@ -262,20 +271,6 @@ function updateTotals(isSilent = false) {
     row.querySelector('.row-total').textContent = total.toLocaleString();
     grandTotal += total;
   });
-
-  const prevGrandTotal = appData.bats[currentBat]._lastGrandTotal || 0;
-  
-  if (!isSilent && grandTotal > 0 && Math.floor(grandTotal / 10000) > Math.floor(prevGrandTotal / 10000)) {
-    if (typeof confetti === 'function') {
-      confetti({
-        particleCount: 150,
-        spread: 80,
-        origin: { y: 0.6 },
-        colors: ['#d4ff37', '#ffffff', '#4c8c2b'],
-        zIndex: 9999
-      });
-    }
-  }
 
   appData.bats[currentBat]._lastGrandTotal = grandTotal;
   grandTotalEl.textContent = grandTotal.toLocaleString();

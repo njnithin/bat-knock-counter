@@ -31,25 +31,25 @@
   --brand-contrast: #121317;
   --surface-container: #1e1f23;
   --primary-container: #c8f328;
-  --surface-dim: #121317;
-  --surface: #121317;
+  --surface-dim: #1e1f23;
+  --surface: #1e1f23;
   --error: #ffb4ab;
-  --surface-container-high: #292a2e;
-  --surface-container-low: #1a1b1f;
+  --surface-container-high: #1e1f23;
+  --surface-container-low: #1e1f23;
   --on-surface-variant: #c5c9ae;
-  --surface-container-lowest: #0d0e12;
-  --surface-variant: #343539;
-  --background: #121317;
+  --surface-container-lowest: #1e1f23;
+  --surface-variant: #1e1f23;
+  --background: #1e1f23;
   --primary: #ffffff;
-  --outline-variant: #444934;
+  --outline-variant: transparent;
   --on-surface: #e3e2e7;
-  --outline: #8f937a;
+  --outline: transparent;
 
-  /* Lumix Dark Mode Fallbacks */
-  --neu-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  --neu-shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --neu-shadow-inset: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
-  --neu-shadow-inset-sm: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  /* Dark Mode Neumorphism */
+  --neu-shadow: 9px 9px 16px rgba(0, 0, 0, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.05);
+  --neu-shadow-sm: 4px 4px 8px rgba(0, 0, 0, 0.6), -4px -4px 8px rgba(255, 255, 255, 0.05);
+  --neu-shadow-inset: inset 6px 6px 10px 0 rgba(0, 0, 0, 0.6), inset -6px -6px 10px 0 rgba(255, 255, 255, 0.05);
+  --neu-shadow-inset-sm: inset 2px 2px 4px 0 rgba(0, 0, 0, 0.6), inset -2px -2px 4px 0 rgba(255, 255, 255, 0.05);
 }
 
 /* Neumorphic Shadow Utility Classes */
@@ -64,7 +64,7 @@
 
 /* Knock Flash Animation */
 @keyframes knockFlash {
-  0% { background-color: rgba(212, 255, 55, 0.4); }
+  0% { background-color: color-mix(in srgb, var(--brand) 40%, transparent); }
   100% { background-color: transparent; }
 }
 
