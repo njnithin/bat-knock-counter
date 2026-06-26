@@ -1,4 +1,4 @@
-# Bat Knock Counter v1.2.0
+# Bat Knock Counter v1.3.0
 
 Welcome to the **Bat Knock Counter**, a comprehensive tool for tracking, managing, and automating bat knocks with professional telemetry and a stunning modern UI!
 
@@ -37,7 +37,11 @@ This application is built for cricket bat makers, players, or enthusiasts who wa
 - **Export to PDF (`.pdf`)**: Generate a clean, styled PDF document summarizing all knocks.
 - **Export to Excel (`.xlsx`)**: Export the raw data into an Excel spreadsheet for your own record keeping or analysis.
 
-### 6. 🎨 Dual Themes (Neumorphic Design)
+### 6. 📱 Progressive Web App (PWA) Offline Mode
+- **Offline Functionality**: Includes a custom Service Worker that intercepts network requests, caches assets, and allows the app to function 100% offline. Perfect for workshops and garages!
+- **Installable**: Provides a web app manifest and high-res vector icons, allowing users to "Install App" and launch it natively from their desktop or mobile home screen.
+
+### 7. 🎨 Dual Themes (Neumorphic Design)
 - Features a highly responsive, modern interface powered by Tailwind CSS with custom styling, perfectly scaling to fit standard viewports.
 - **Light Theme (Bright Neumorphic)**: A sleek, physical design where elements are softly extruded from or pressed into a bright, unified background using complex inner and outer shadows.
 - **Dark Theme (Dark Neumorphic)**: A stealthy, high-contrast adaptation of the neumorphic physical aesthetic, featuring deep dark backgrounds and glowing neon accents.

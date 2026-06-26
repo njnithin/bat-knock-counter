@@ -4,8 +4,22 @@
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta name="theme-color" content="#e0e5ec">
   <title>Bat Knock Counter - Lumix</title>
+  
+  <link rel="manifest" href="manifest.json">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(registration => console.log('ServiceWorker registered:', registration.scope))
+          .catch(error => console.log('ServiceWorker registration failed:', error));
+      });
+    }
+  </script>
 
   <!-- Dependencies -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
