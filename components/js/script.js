@@ -649,11 +649,9 @@ exportImageBtn.addEventListener('click', () => {
     swaps.push({ input, div });
   });
 
-  html2canvas(wrapper, { 
-    backgroundColor: getComputedStyle(document.body).backgroundColor,
-    useCORS: true,
-    allowTaint: true
-  }).then(canvas => {
+  htmlToImage.toPng(wrapper, { 
+    backgroundColor: getComputedStyle(document.body).backgroundColor
+  }).then(dataUrl => {
     // Revert the DOM
     swaps.forEach(swap => {
       swap.input.style.display = '';
@@ -662,10 +660,10 @@ exportImageBtn.addEventListener('click', () => {
     
     const link = document.createElement('a');
     link.download = `Bat_Knocks_${(appData.lastEdited || 'Default').replace(/\s+/g, '_')}.png`;
-    link.href = canvas.toDataURL("image/png");
+    link.href = dataUrl;
     link.click();
   }).catch(err => {
-    console.error("html2canvas error:", err);
+    console.error("html-to-image error:", err);
     alert("Failed to export image: " + err.message);
     swaps.forEach(swap => {
       swap.input.style.display = '';
