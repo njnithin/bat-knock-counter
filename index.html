@@ -118,7 +118,10 @@
 
   <!-- Main Content -->
   <main class="flex-grow w-full px-4 md:px-8 py-8 md:py-12 flex justify-center">
-    <div class="w-full max-w-4xl space-y-6">
+    <div class="w-full max-w-6xl flex flex-col xl:flex-row gap-8 items-start">
+      
+      <!-- Left Column: Controls & Telemetry Dashboard -->
+      <div class="flex-1 w-full space-y-6 max-w-4xl mx-auto xl:mx-0">
 
       <!-- Controls & Bat Management -->
       <div
@@ -212,8 +215,7 @@
           <table class="w-full text-left border-separate" style="border-spacing: 0 12px;">
             <thead>
               <tr class="text-on-surface-variant">
-                <th class="py-2 px-6 text-sm font-semibold w-16 text-center"><span
-                    class="material-symbols-outlined text-[16px]">target</span></th>
+                <th class="py-2 px-6 text-sm font-semibold w-16 text-center"><span class="material-symbols-outlined text-[16px]">target</span></th>
                 <th class="py-2 px-6 text-sm font-semibold uppercase tracking-wider">Portion</th>
                 <th class="py-2 px-6 text-sm font-semibold uppercase tracking-wider text-center">Counter</th>
                 <th class="py-2 px-6 text-sm font-semibold uppercase tracking-wider text-right">Total Knocks</th>
@@ -226,14 +228,88 @@
         </div>
 
         <!-- Grand Total Footer -->
-        <div
-          class="bg-surface-container-highest border-t border-outline-variant p-6 flex justify-end items-center gap-8">
+        <div class="bg-surface-container-highest border-t border-outline-variant p-6 flex justify-end items-center gap-8">
           <span class="text-sm font-semibold text-on-surface-variant uppercase tracking-widest">Grand Total</span>
-          <span id="grandTotal"
-            class="text-3xl font-bold text-brand drop-shadow-[0_0_8px_rgba(212,255,55,0.3)]">0</span>
+          <span id="grandTotal" class="text-3xl font-bold text-brand drop-shadow-[0_0_8px_rgba(212,255,55,0.3)]">0</span>
         </div>
       </div>
 
+      </div> <!-- End Left Column -->
+
+      <!-- Right Column: Bat Heatmap -->
+      <div class="w-full xl:w-80 flex-shrink-0 xl:sticky xl:top-24 flex flex-col gap-6">
+        <div class="glass-card rounded-3xl p-6 neu-shadow flex flex-col items-center justify-center border-transparent border">
+          <h3 class="text-sm font-semibold text-on-surface-variant uppercase tracking-wider mb-6 flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">local_fire_department</span> Knock Heatmap</h3>
+          
+          <div class="flex flex-col items-center relative">
+            <!-- Handle Group -->
+            <div class="flex flex-col items-center mb-[-6px] relative z-10">
+              <!-- Pommel -->
+              <div class="w-6 h-2.5 bg-surface-container-highest rounded-t-md rounded-b-[1px] neu-shadow-inset-sm mb-[-2px]"></div>
+              <!-- Grip -->
+              <div class="w-5 h-24 bg-surface-container-high neu-shadow-inset-sm flex flex-col justify-evenly px-[2px]">
+                <div class="w-full h-px bg-surface-container-highest"></div>
+                <div class="w-full h-px bg-surface-container-highest"></div>
+                <div class="w-full h-px bg-surface-container-highest"></div>
+                <div class="w-full h-px bg-surface-container-highest"></div>
+                <div class="w-full h-px bg-surface-container-highest"></div>
+                <div class="w-full h-px bg-surface-container-highest"></div>
+                <div class="w-full h-px bg-surface-container-highest"></div>
+              </div>
+              <!-- Black Rubber Band -->
+              <div class="w-6 h-2 bg-[#111] rounded-[1px] mt-[-2px] z-20"></div>
+            </div>
+            
+            <!-- Blade Outer (Neumorphic Shadow) -->
+            <div class="bg-surface-container neu-shadow relative z-20 flex flex-col"
+                 style="width: 100px; height: 290px; border-radius: 40px 40px 50px 50px / 65px 65px 14px 14px; padding: 4px;">
+                 
+                 <!-- Blade Inner (The Grid) -->
+                 <div class="flex-1 w-full h-full flex flex-col overflow-hidden relative"
+                      style="border-radius: 36px 36px 46px 46px / 61px 61px 10px 10px;">
+                    
+                    <!-- Bat Sticker (Top 45%) -->
+                    <div class="absolute top-0 left-0 w-full h-[45%] flex items-center justify-center z-10 pt-2 pb-1 overflow-hidden">
+                      <span id="heatmapBatNameDisplay" class="font-black text-center text-sm uppercase text-brand whitespace-nowrap drop-shadow-[0_0_8px_rgba(212,255,55,0.2)] dark:drop-shadow-[0_0_8px_rgba(59,125,240,0.2)]" style="writing-mode: vertical-rl; text-orientation: mixed; text-shadow: 2px 2px 4px rgba(0,0,0,0.4), 1px 1px 1px rgba(0,0,0,0.8), -1px -1px 1px rgba(255,255,255,0.2); letter-spacing: 0.1em; line-height: 1;"></span>
+                    </div>
+
+                    <!-- Grid Cells (Bottom 55%) -->
+                    <div class="absolute bottom-0 left-0 w-full h-[55%] flex flex-col gap-1 z-10 pb-[2px]">
+                      <!-- Row 1 -->
+                      <div class="flex-1 grid grid-cols-3 gap-1">
+                        <div id="heat-1L" class="heatmap-cell bg-surface-container-high neu-shadow-inset-sm rounded-[2px]"></div>
+                        <div id="heat-1M" class="heatmap-cell bg-surface-container-high neu-shadow-inset-sm rounded-[2px]"></div>
+                        <div id="heat-1R" class="heatmap-cell bg-surface-container-high neu-shadow-inset-sm rounded-[2px]"></div>
+                      </div>
+                      <!-- Row 2 -->
+                      <div class="flex-1 grid grid-cols-3 gap-1">
+                        <div id="heat-2L" class="heatmap-cell bg-surface-container-high neu-shadow-inset-sm rounded-[2px]"></div>
+                        <div id="heat-2M" class="heatmap-cell bg-surface-container-high neu-shadow-inset-sm rounded-[2px]"></div>
+                        <div id="heat-2R" class="heatmap-cell bg-surface-container-high neu-shadow-inset-sm rounded-[2px]"></div>
+                      </div>
+                      <!-- Row 3 -->
+                      <div class="flex-1 grid grid-cols-3 gap-1">
+                        <div id="heat-3L" class="heatmap-cell bg-surface-container-high neu-shadow-inset-sm rounded-[2px]"></div>
+                        <div id="heat-3M" class="heatmap-cell bg-surface-container-high neu-shadow-inset-sm rounded-[2px]"></div>
+                        <div id="heat-3R" class="heatmap-cell bg-surface-container-high neu-shadow-inset-sm rounded-[2px]"></div>
+                      </div>
+                      <!-- Row 4 -->
+                      <div class="flex-1 grid grid-cols-3 gap-1">
+                        <div id="heat-4L" class="heatmap-cell bg-surface-container-high neu-shadow-inset-sm rounded-[2px]"></div>
+                        <div id="heat-4M" class="heatmap-cell bg-surface-container-high neu-shadow-inset-sm rounded-[2px]"></div>
+                        <div id="heat-4R" class="heatmap-cell bg-surface-container-high neu-shadow-inset-sm rounded-[2px]"></div>
+                      </div>
+                    </div>
+                    
+                    <!-- Overlay for inset shadow over the clipped edges -->
+                    <div class="absolute inset-0 pointer-events-none z-20 shadow-[inset_0_2px_8px_rgba(0,0,0,0.2)] dark:shadow-[inset_0_2px_8px_rgba(0,0,0,0.4)]"
+                         style="border-radius: 39px 39px 51px 51px / 65px 65px 11px 11px;"></div>
+                 </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
     </div>
   </main>
 
@@ -264,7 +340,7 @@
       <div class="space-y-4 mb-8">
         <div>
           <label class="block text-sm font-semibold text-on-surface-variant mb-1">Bat Name</label>
-          <input type="text" id="newBatNameInput" class="w-full h-12 bg-surface-container-high rounded-xl px-4 text-on-surface font-semibold neu-shadow-inset border-transparent focus:ring-brand focus:border-brand" placeholder="e.g. GM Player Edition">
+          <input type="text" id="newBatNameInput" maxlength="10" class="w-full h-12 bg-surface-container-high rounded-xl px-4 text-on-surface font-semibold neu-shadow-inset border-transparent focus:ring-brand focus:border-brand" placeholder="e.g. GM Player">
         </div>
         <div>
           <label id="newBatWeightLabel" class="block text-sm font-semibold text-on-surface-variant mb-1">Bat Weight</label>
@@ -288,7 +364,7 @@
       <div class="space-y-4 mb-8">
         <div>
           <label class="block text-sm font-semibold text-on-surface-variant mb-1">Bat Name</label>
-          <input type="text" id="editBatNameInput" class="w-full h-12 bg-surface-container-high rounded-xl px-4 text-on-surface font-semibold neu-shadow-inset border-transparent focus:ring-brand focus:border-brand">
+          <input type="text" id="editBatNameInput" maxlength="10" class="w-full h-12 bg-surface-container-high rounded-xl px-4 text-on-surface font-semibold neu-shadow-inset border-transparent focus:ring-brand focus:border-brand">
         </div>
         <div>
           <label id="editBatWeightLabel" class="block text-sm font-semibold text-on-surface-variant mb-1">Bat Weight</label>

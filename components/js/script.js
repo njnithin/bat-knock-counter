@@ -304,6 +304,50 @@ function updateTotals(isSilent = false) {
 
   appData.bats[currentBat]._lastGrandTotal = grandTotal;
   grandTotalEl.textContent = grandTotal.toLocaleString();
+  
+  updateHeatmap();
+}
+
+// Update Heatmap UI based on knock volume
+function updateHeatmap() {
+  const currentBat = appData.lastEdited;
+  const batData = appData.bats[currentBat] || {};
+  
+  // Find max knocks across all 12 portions
+  let maxCount = 0;
+  portions.forEach(portion => {
+    const counter = batData[portion] || 0;
+    const totalCount = counter * 1000;
+    if (totalCount > maxCount) maxCount = totalCount;
+  });
+
+  portions.forEach(portion => {
+    const heatEl = document.getElementById(`heat-${portion}`);
+    if (!heatEl) return;
+    
+    const counter = batData[portion] || 0;
+    const totalCount = counter * 1000;
+    
+    if (maxCount > 0 && totalCount > 0) {
+      const intensity = (totalCount / maxCount) * 100;
+      const safeIntensity = Math.max(15, intensity); // Min 15% glow if knocked at least once
+      
+      // Remove inset shadow when glowing, apply color-mix
+      heatEl.classList.remove('neu-shadow-inset-sm');
+      heatEl.style.backgroundColor = `color-mix(in srgb, var(--brand) ${safeIntensity}%, var(--surface-container-high))`;
+      
+      // Add a subtle outer glow if highly active
+      if (intensity > 40) {
+        heatEl.style.boxShadow = `0 0 ${intensity / 8}px color-mix(in srgb, var(--brand) ${intensity/2}%, transparent)`;
+      } else {
+        heatEl.style.boxShadow = '';
+      }
+    } else {
+      heatEl.classList.add('neu-shadow-inset-sm');
+      heatEl.style.backgroundColor = '';
+      heatEl.style.boxShadow = '';
+    }
+  });
 }
 
 // Populate table from state
@@ -319,7 +363,9 @@ function populateTable() {
   
   if (activeBatNameDisplay) {
     activeBatNameDisplay.textContent = currentBat;
+    const unitSwitcher = document.getElementById('unitSwitcherContainer');
     if (batData._weightInGrams) {
+      if (unitSwitcher) unitSwitcher.style.display = 'flex';
       if (weightUnit === 'lbs') {
         const lbs = (batData._weightInGrams / 453.592).toFixed(2);
         activeBatWeightDisplay.textContent = `(Weight: ${lbs} lbs)`;
@@ -328,8 +374,14 @@ function populateTable() {
         activeBatWeightDisplay.textContent = `(Weight: ${g} g)`;
       }
     } else {
+      if (unitSwitcher) unitSwitcher.style.display = 'none';
       activeBatWeightDisplay.textContent = '';
     }
+  }
+
+  const sticker = document.getElementById('heatmapBatNameDisplay');
+  if (sticker) {
+    sticker.textContent = currentBat.length > 10 ? currentBat.substring(0, 10) : currentBat;
   }
 
   applyLockState();
@@ -477,6 +529,16 @@ confirmAddBatBtn.addEventListener('click', () => {
   const weightVal = parseFloat(newBatWeightInput.value);
   
   if (name) {
+    if (name.length > 10) {
+      alert("Bat name cannot exceed 10 characters.");
+      return;
+    }
+    
+    if (!/^[a-zA-Z0-9 ]+$/.test(name)) {
+      alert("Bat name can only contain letters, numbers, and spaces.");
+      return;
+    }
+
     if (!appData.bats[name]) {
       appData.bats[name] = {};
       if (!isNaN(weightVal)) {
@@ -501,7 +563,9 @@ resetBatBtn.addEventListener('click', () => {
     portions.forEach(portion => {
       if (!appData.bats[currentBat]) appData.bats[currentBat] = {};
       appData.bats[currentBat][portion] = 0;
+      appData.bats[currentBat][portion + '_partial'] = 0;
     });
+    liveKnockCountEl.value = 0;
     populateTable();
     triggerSave();
   }
@@ -722,6 +786,7 @@ liveKnockCountEl.addEventListener('input', (e) => {
     let val = parseInt(e.target.value, 10);
     if (isNaN(val) || val < 0) val = 0;
     setPartialCount(checkedRadio.value, val);
+    updateHeatmap();
     triggerSave();
   }
 });
@@ -847,6 +912,7 @@ function registerKnock() {
     }
   }
   
+  updateHeatmap();
   triggerSave(); // Save partial counts and totals
 }
 
@@ -889,6 +955,16 @@ confirmEditBatBtn.addEventListener('click', () => {
   
   if (!newName) {
     alert("Please enter a bat name.");
+    return;
+  }
+  
+  if (newName.length > 10) {
+    alert("Bat name cannot exceed 10 characters.");
+    return;
+  }
+  
+  if (!/^[a-zA-Z0-9 ]+$/.test(newName)) {
+    alert("Bat name can only contain letters, numbers, and spaces.");
     return;
   }
   
