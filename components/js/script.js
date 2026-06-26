@@ -352,8 +352,8 @@ function updateHeatmap() {
 
 // Populate table from state
 function populateTable() {
-  const currentBat = appData.lastEdited;
-  const batData = appData.bats[currentBat] || {};
+  const currentBat = appData.lastEdited || '';
+  const batData = currentBat ? (appData.bats[currentBat] || {}) : {};
 
   document.querySelectorAll('tbody tr').forEach(row => {
     const portion = row.dataset.portion;
@@ -362,7 +362,7 @@ function populateTable() {
   });
   
   if (activeBatNameDisplay) {
-    activeBatNameDisplay.textContent = currentBat;
+    activeBatNameDisplay.textContent = currentBat || 'No Bat Selected';
     const unitSwitcher = document.getElementById('unitSwitcherContainer');
     if (batData._weightInGrams) {
       if (unitSwitcher) unitSwitcher.style.display = 'flex';
