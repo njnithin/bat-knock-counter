@@ -630,6 +630,11 @@ lockBatBtn.addEventListener('click', () => {
 
 exportImageBtn.addEventListener('click', () => {
   const wrapper = document.querySelector('.table-wrapper');
+  if (!wrapper) {
+    alert("Error: Table wrapper not found");
+    return;
+  }
+  
   const inputs = wrapper.querySelectorAll('input.counter-input');
   
   // Swap inputs to divs to avoid html2canvas rendering bugs with inset shadows and input paddings
@@ -644,7 +649,11 @@ exportImageBtn.addEventListener('click', () => {
     swaps.push({ input, div });
   });
 
-  html2canvas(wrapper, { backgroundColor: getComputedStyle(document.body).backgroundColor }).then(canvas => {
+  html2canvas(wrapper, { 
+    backgroundColor: getComputedStyle(document.body).backgroundColor,
+    useCORS: true,
+    allowTaint: true
+  }).then(canvas => {
     // Revert the DOM
     swaps.forEach(swap => {
       swap.input.style.display = '';
@@ -652,10 +661,12 @@ exportImageBtn.addEventListener('click', () => {
     });
     
     const link = document.createElement('a');
-    link.download = `Bat_Knocks_${appData.lastEdited.replace(/\s+/g, '_')}.png`;
-    link.href = canvas.toDataURL();
+    link.download = `Bat_Knocks_${(appData.lastEdited || 'Default').replace(/\s+/g, '_')}.png`;
+    link.href = canvas.toDataURL("image/png");
     link.click();
   }).catch(err => {
+    console.error("html2canvas error:", err);
+    alert("Failed to export image: " + err.message);
     swaps.forEach(swap => {
       swap.input.style.display = '';
       swap.div.remove();
