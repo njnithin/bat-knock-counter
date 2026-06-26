@@ -417,10 +417,18 @@ const authLoadingOverlay = document.getElementById('authLoadingOverlay');
 
 if (loginBtn) {
   loginBtn.addEventListener('click', () => {
-    firebaseAuth.signInWithPopup(firebaseProvider).catch(err => {
-      console.error("Login failed:", err);
-      alert("Login failed: " + err.message);
-    });
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      // Mobile browsers often block popups. Use redirect instead.
+      firebaseAuth.signInWithRedirect(firebaseProvider).catch(err => {
+        alert("Login failed: " + err.message);
+      });
+    } else {
+      firebaseAuth.signInWithPopup(firebaseProvider).catch(err => {
+        console.error("Login failed:", err);
+        alert("Login failed: " + err.message);
+      });
+    }
   });
 }
 
