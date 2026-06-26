@@ -352,7 +352,7 @@ function updateHeatmap() {
 
 // Populate table from state
 function populateTable() {
-  const currentBat = appData.lastEdited || '';
+  const currentBat = appData.lastEdited || 'Default';
   const batData = currentBat ? (appData.bats[currentBat] || {}) : {};
 
   document.querySelectorAll('tbody tr').forEach(row => {
@@ -362,7 +362,7 @@ function populateTable() {
   });
   
   if (activeBatNameDisplay) {
-    activeBatNameDisplay.textContent = currentBat || 'No Bat Selected';
+    activeBatNameDisplay.textContent = currentBat;
     const unitSwitcher = document.getElementById('unitSwitcherContainer');
     if (batData._weightInGrams) {
       if (unitSwitcher) unitSwitcher.style.display = 'flex';
@@ -450,11 +450,12 @@ function subscribeToData() {
   unsubscribeSnapshot = docRef.onSnapshot(doc => {
     if (doc.exists) {
       const data = doc.data();
-      if (data && data.bats) {
+      if (data && data.bats && Object.keys(data.bats).length > 0) {
         // Prevent local saves from overwriting incoming cloud data if we just saved
         if (Date.now() - lastSaveTime > 2000) {
            appData = data;
            if (!appData.lockedBats) appData.lockedBats = {};
+           if (!appData.lastEdited) appData.lastEdited = Object.keys(appData.bats)[0];
            
            let migrated = false;
            Object.values(appData.bats).forEach(bat => {
@@ -476,10 +477,14 @@ function subscribeToData() {
            
            if (migrated) triggerSave();
         }
+      } else {
+        // Doc exists but data is empty or broken
+        appData = { bats: { 'Default': { toe: 0, edges: 0, splice: 0, blade: 0, _weightInGrams: 1100 } }, lastEdited: 'Default', lockedBats: {} };
+        triggerSave();
       }
     } else {
-      // New User
-      appData = { bats: {}, lastEdited: null };
+      // Brand New User
+      appData = { bats: { 'Default': { toe: 0, edges: 0, splice: 0, blade: 0, _weightInGrams: 1100 } }, lastEdited: 'Default', lockedBats: {} };
       triggerSave(); // create doc
     }
     setStatus('Cloud Sync', 'bg-brand');
