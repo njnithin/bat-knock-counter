@@ -399,63 +399,96 @@ function setStatus(text, colorClass) {
   }
 }
 
-// API functions
-async function loadData() {
-  try {
-    setStatus('Loading...', 'bg-orange-400');
-    
-    const res = await fetch('/api/data');
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.bats) {
-        appData = data;
-        if (!appData.lockedBats) appData.lockedBats = {};
-        
-        let migrated = false;
-        Object.values(appData.bats).forEach(bat => {
-          if (bat._weight !== undefined && bat._weightInGrams === undefined) {
-            let w = String(bat._weight).toLowerCase();
-            if (w.includes('lb')) {
-              bat._weightInGrams = parseFloat(w) * 453.592;
-            } else {
-              bat._weightInGrams = parseFloat(w);
-            }
-            delete bat._weight;
-            migrated = true;
-          }
-        });
-        if (migrated) triggerSave();
-      }
-    }
-    
-    updateUnitToggleUI();
-    renderTabs();
-    populateTable();
-    setStatus('Synced', 'bg-brand');
-  } catch (error) {
-    console.error('Error loading data:', error);
-    setStatus('Offline (Local Only)', 'bg-yellow-400');
-    renderTabs();
-    populateTable(); // Fallback to memory
-  }
+// Firebase Integration
+const { firebaseAuth, firebaseDb, firebaseProvider } = window;
+let currentUser = null;
+let unsubscribeSnapshot = null;
+let saveTimeout;
+let lastSaveTime = 0;
+
+// Auth UI Elements
+const loginBtn = document.getElementById('loginBtn');
+const userProfile = document.getElementById('userProfile');
+const userName = document.getElementById('userName');
+const userAvatar = document.getElementById('userAvatar');
+const logoutBtn = document.getElementById('logoutBtn');
+const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+const authLoadingOverlay = document.getElementById('authLoadingOverlay');
+
+if (loginBtn) {
+  loginBtn.addEventListener('click', () => {
+    firebaseAuth.signInWithPopup(firebaseProvider).catch(err => {
+      console.error("Login failed:", err);
+      alert("Login failed: " + err.message);
+    });
+  });
 }
 
-let saveTimeout;
+const handleLogout = () => {
+  firebaseAuth.signOut();
+};
+
+if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', handleLogout);
+
+function subscribeToData() {
+  if (!currentUser) return;
+  
+  setStatus('Syncing...', 'bg-orange-400');
+  const docRef = firebaseDb.collection('users').doc(currentUser.uid);
+  
+  if (unsubscribeSnapshot) unsubscribeSnapshot();
+  
+  unsubscribeSnapshot = docRef.onSnapshot(doc => {
+    if (doc.exists) {
+      const data = doc.data();
+      if (data && data.bats) {
+        // Prevent local saves from overwriting incoming cloud data if we just saved
+        if (Date.now() - lastSaveTime > 2000) {
+           appData = data;
+           if (!appData.lockedBats) appData.lockedBats = {};
+           
+           let migrated = false;
+           Object.values(appData.bats).forEach(bat => {
+             if (bat._weight !== undefined && bat._weightInGrams === undefined) {
+               let w = String(bat._weight).toLowerCase();
+               if (w.includes('lb')) {
+                 bat._weightInGrams = parseFloat(w) * 453.592;
+               } else {
+                 bat._weightInGrams = parseFloat(w);
+               }
+               delete bat._weight;
+               migrated = true;
+             }
+           });
+           
+           updateUnitToggleUI();
+           renderTabs();
+           populateTable();
+           
+           if (migrated) triggerSave();
+        }
+      }
+    } else {
+      // New User
+      appData = { bats: {}, lastEdited: null };
+      triggerSave(); // create doc
+    }
+    setStatus('Cloud Sync', 'bg-brand');
+  }, error => {
+    console.error('Firestore listener error:', error);
+    setStatus('Sync Failed', 'bg-red-500');
+  });
+}
+
 async function saveData() {
+  if (!currentUser) return;
   setStatus('Saving...', 'bg-orange-400');
   
   try {
-    const res = await fetch('/api/data', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(appData)
-    });
-    
-    if (res.ok) {
-      setTimeout(() => setStatus('Synced', 'bg-brand'), 500);
-    } else {
-      throw new Error('Save failed');
-    }
+    lastSaveTime = Date.now();
+    await firebaseDb.collection('users').doc(currentUser.uid).set(appData, { merge: true });
+    setTimeout(() => setStatus('Cloud Sync', 'bg-brand'), 500);
   } catch (error) {
     console.error('Error saving data:', error);
     setStatus('Save Failed', 'bg-red-500');
@@ -464,6 +497,7 @@ async function saveData() {
 
 // Debounce save function to prevent spamming server
 function triggerSave() {
+  if (!currentUser) return;
   clearTimeout(saveTimeout);
   saveTimeout = setTimeout(saveData, 500);
 }
@@ -744,7 +778,35 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
 
 // App Startup
 initTable();
-loadData();
+// Initialize Auth State Listener
+firebaseAuth.onAuthStateChanged(user => {
+  if (authLoadingOverlay) authLoadingOverlay.classList.add('opacity-0', 'pointer-events-none');
+  
+  if (user) {
+    currentUser = user;
+    if (loginBtn) loginBtn.classList.add('hidden');
+    if (userProfile) userProfile.classList.remove('hidden');
+    if (userProfile) userProfile.classList.add('flex');
+    if (userName) userName.textContent = user.displayName ? user.displayName.split(' ')[0] : 'User';
+    if (userAvatar) userAvatar.src = user.photoURL || '';
+    
+    // Load User Data
+    subscribeToData();
+  } else {
+    currentUser = null;
+    if (loginBtn) loginBtn.classList.remove('hidden');
+    if (userProfile) userProfile.classList.add('hidden');
+    if (userProfile) userProfile.classList.remove('flex');
+    
+    if (unsubscribeSnapshot) unsubscribeSnapshot();
+    
+    // Clear data and show empty state
+    appData = { bats: {}, lastEdited: null };
+    renderTabs();
+    populateTable();
+    setStatus('Offline (Logged Out)', 'bg-yellow-400');
+  }
+});
 
 // --- Audio Recorder Logic ---
 window.isListening = false; // Expose to global for lock check
