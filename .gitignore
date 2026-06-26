@@ -1,0 +1,9 @@
+# Ignore user-generated data files
+components/data/data.json
+
+# Ignore node_modules if they install dependencies later
+node_modules/
+
+# OS generated files
+.DS_Store
+Thumbs.db
