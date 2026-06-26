@@ -53,19 +53,3 @@ This application is built for cricket bat makers, players, or enthusiasts who wa
    node server.js
    ```
 4. Open your browser and navigate to `http://localhost:3000`.
-
-## GitHub Integration
-
-To push this project to your GitHub repository, run the following commands in this directory:
-
-```bash
-# Initialize the repository and commit the v1.0.0 code
-git init
-git add .
-git commit -m "Initial commit: Bat Knock Counter v1.0.0"
-
-# Link your GitHub repository and push
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
-git push -u origin main
-```
