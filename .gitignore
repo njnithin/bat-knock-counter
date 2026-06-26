@@ -10,3 +10,6 @@ Thumbs.db
 
 # Local developer notes
 notes.md
+
+# Ignore sensitive Firebase config
+components/js/firebase-config.js
