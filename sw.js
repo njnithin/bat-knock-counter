@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bat-knock-cache-v1';
+const CACHE_NAME = 'bat-knock-cache-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -6,10 +6,7 @@ const ASSETS_TO_CACHE = [
   '/components/js/script.js',
   '/favicon.svg',
   '/icon-192.png',
-  '/icon-512.png',
-  'https://cdn.tailwindcss.com',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap',
-  'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0'
+  '/icon-512.png'
 ];
 
 // Install Event - Cache Core Assets
