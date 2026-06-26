@@ -1,4 +1,4 @@
-# Bat Knock Counter v1.0.0
+# Bat Knock Counter v1.1.0
 
 Welcome to the **Bat Knock Counter**, a comprehensive tool for tracking, managing, and automating bat knocks with professional telemetry and a stunning modern UI!
 
@@ -8,6 +8,7 @@ This application is built for cricket bat makers, players, or enthusiasts who wa
 
 ### 1. 🦇 Bat Profile Management
 - **Multiple Bats**: Create and manage multiple bat profiles concurrently. Your data is isolated per bat.
+- **Bat Weights**: Keep track of the exact weight of each bat. Seamlessly toggle between grams (g) and pounds (lbs) to suit your preference.
 - **Lock System**: Lock a specific bat to prevent accidental edits or recording when you are done tracking its knocks. The table automatically grays out and enters an inactive, read-only state.
 - **Easy Switch**: Quickly switch between your active bats using the beautifully styled Neumorphic bat tabs.
 
@@ -24,6 +25,7 @@ This application is built for cricket bat makers, players, or enthusiasts who wa
 ### 4. 📊 Data Visualization & Tracking
 - Tracks knocks across 12 predefined bat portions (1L to 4R).
 - Shows live partial counters alongside the total recorded counts.
+- **Floating Row Cards**: Instead of boring standard table lines, the data rows are separated into individual, floating 3D cards using neumorphic shadows.
 - **Milestone Popups & Confetti**: 
   - Once a portion hits a multiple of 10,000 knocks, you'll be greeted with a celebratory muscle popup and a localized confetti burst!
   - **Mega Golden Confetti**: If every single portion on the bat reaches the 10,000 knock milestone, a massive golden confetti celebration will cover the entire screen!
