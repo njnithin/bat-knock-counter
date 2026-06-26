@@ -92,19 +92,23 @@
 .live-knock-input::-webkit-outer-spin-button,
 .live-knock-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
+  appearance: none;
   margin: 0;
 }
 .live-knock-input[type=number] {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .counter-input::-webkit-outer-spin-button,
 .counter-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
+  appearance: none;
   margin: 0;
 }
 .counter-input[type=number] {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 /* Locked mode styles */
@@ -116,4 +120,37 @@
 
 table {
   transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Table Rows Neumorphism */
+.data-row {
+  box-shadow: var(--neu-shadow-sm);
+  background-color: var(--surface-container);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+.data-row:hover {
+  box-shadow: var(--neu-shadow);
+  transform: translateY(-2px);
+}
+.data-row td:first-child {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+}
+.data-row td:last-child {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+/* Custom Radio Button Neumorphism */
+.radio-neu:not(:checked) {
+  box-shadow: var(--neu-shadow-inset-sm) !important;
+  background-color: var(--surface-container-high) !important;
+}
+
+.radio-neu:checked {
+  background-color: var(--surface-container) !important;
+  border: 2px solid var(--brand) !important;
+  background-image: radial-gradient(circle, var(--brand) 35%, transparent 45%) !important;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--brand) 40%, transparent) !important;
 }

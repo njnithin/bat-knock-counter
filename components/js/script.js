@@ -25,6 +25,55 @@ const themeOptions = document.querySelectorAll('.theme-option');
 const muscleModal = document.getElementById('muscleModal');
 const muscleMessage = document.getElementById('muscleMessage');
 
+const activeBatNameDisplay = document.getElementById('activeBatNameDisplay');
+const activeBatWeightDisplay = document.getElementById('activeBatWeightDisplay');
+const addBatModal = document.getElementById('addBatModal');
+const addBatModalContent = document.getElementById('addBatModalContent');
+const newBatNameInput = document.getElementById('newBatNameInput');
+const newBatWeightInput = document.getElementById('newBatWeightInput');
+const cancelAddBatBtn = document.getElementById('cancelAddBatBtn');
+const confirmAddBatBtn = document.getElementById('confirmAddBatBtn');
+
+const editBatModal = document.getElementById('editBatModal');
+const editBatModalContent = document.getElementById('editBatModalContent');
+const editBatNameInput = document.getElementById('editBatNameInput');
+const editBatWeightInput = document.getElementById('editBatWeightInput');
+const cancelEditBatBtn = document.getElementById('cancelEditBatBtn');
+const confirmEditBatBtn = document.getElementById('confirmEditBatBtn');
+const unitBtnG = document.getElementById('unitBtnG');
+const unitBtnLbs = document.getElementById('unitBtnLbs');
+const newBatWeightLabel = document.getElementById('newBatWeightLabel');
+const editBatWeightLabel = document.getElementById('editBatWeightLabel');
+let weightUnit = localStorage.getItem('batWeightUnit') || 'g';
+
+function updateUnitToggleUI() {
+  if (weightUnit === 'g') {
+    if (unitBtnG) unitBtnG.className = 'px-3 py-1 text-[11px] font-bold rounded-full transition-all bg-brand text-brand-contrast neu-shadow border-transparent border';
+    if (unitBtnLbs) unitBtnLbs.className = 'px-3 py-1 text-[11px] font-bold rounded-full transition-all text-on-surface-variant hover:text-on-surface border-transparent border';
+  } else {
+    if (unitBtnLbs) unitBtnLbs.className = 'px-3 py-1 text-[11px] font-bold rounded-full transition-all bg-brand text-brand-contrast neu-shadow border-transparent border';
+    if (unitBtnG) unitBtnG.className = 'px-3 py-1 text-[11px] font-bold rounded-full transition-all text-on-surface-variant hover:text-on-surface border-transparent border';
+  }
+  
+  const placeholderLabel = `Bat Weight (in ${weightUnit})`;
+  if (newBatWeightLabel) newBatWeightLabel.textContent = placeholderLabel;
+  if (editBatWeightLabel) editBatWeightLabel.textContent = placeholderLabel;
+  
+  populateTable(); // to update display
+}
+
+if (unitBtnG) unitBtnG.addEventListener('click', () => {
+  weightUnit = 'g';
+  localStorage.setItem('batWeightUnit', 'g');
+  updateUnitToggleUI();
+});
+
+if (unitBtnLbs) unitBtnLbs.addEventListener('click', () => {
+  weightUnit = 'lbs';
+  localStorage.setItem('batWeightUnit', 'lbs');
+  updateUnitToggleUI();
+});
+
 // Audio elements
 const micToggleBtn = document.getElementById('micToggleBtn');
 const micSensitivity = document.getElementById('micSensitivity');
@@ -152,7 +201,7 @@ function initTable() {
     row.className = 'data-row transition-colors group';
     row.innerHTML = `
       <td class="py-3 px-6 text-center">
-        <input type="radio" name="targetPortion" class="target-radio form-radio text-brand rounded-full bg-surface-container border-transparent focus:ring-brand focus:ring-offset-surface-container-low h-5 w-5 cursor-pointer" value="${portion}" ${portion === portions[0] ? 'checked' : ''}>
+        <input type="radio" name="targetPortion" class="target-radio form-radio text-brand rounded-full border-transparent focus:ring-brand focus:ring-offset-surface-container-low h-5 w-5 cursor-pointer radio-neu" value="${portion}" ${portion === portions[0] ? 'checked' : ''}>
       </td>
       <td class="py-3 px-6 text-body-md font-semibold text-on-surface">${portion}</td>
       <td class="py-3 px-6">
@@ -198,26 +247,7 @@ function renderTabs() {
 
     tab.onclick = (e) => {
       if (e.target.classList.contains('edit-bat')) {
-        const newName = prompt("Enter new name for this bat:", batName);
-        if (newName && newName.trim() && newName.trim() !== batName) {
-          const finalName = newName.trim();
-          if (appData.bats[finalName]) {
-            alert("A bat with this name already exists.");
-            return;
-          }
-          
-          appData.bats[finalName] = appData.bats[batName];
-          delete appData.bats[batName];
-          
-          if (appData.lockedBats && appData.lockedBats[batName]) {
-            appData.lockedBats[finalName] = appData.lockedBats[batName];
-            delete appData.lockedBats[batName];
-          }
-
-          if (appData.lastEdited === batName) appData.lastEdited = finalName;
-          renderTabs();
-          triggerSave();
-        }
+        openEditBatModal(batName);
         return;
       }
       
@@ -287,6 +317,21 @@ function populateTable() {
     input.value = batData[portion] || 0;
   });
   
+  if (activeBatNameDisplay) {
+    activeBatNameDisplay.textContent = currentBat;
+    if (batData._weightInGrams) {
+      if (weightUnit === 'lbs') {
+        const lbs = (batData._weightInGrams / 453.592).toFixed(2);
+        activeBatWeightDisplay.textContent = `(Weight: ${lbs} lbs)`;
+      } else {
+        const g = Math.round(batData._weightInGrams);
+        activeBatWeightDisplay.textContent = `(Weight: ${g} g)`;
+      }
+    } else {
+      activeBatWeightDisplay.textContent = '';
+    }
+  }
+
   applyLockState();
   updateTotals(true);
 }
@@ -313,9 +358,25 @@ async function loadData() {
       if (data && data.bats) {
         appData = data;
         if (!appData.lockedBats) appData.lockedBats = {};
+        
+        let migrated = false;
+        Object.values(appData.bats).forEach(bat => {
+          if (bat._weight !== undefined && bat._weightInGrams === undefined) {
+            let w = String(bat._weight).toLowerCase();
+            if (w.includes('lb')) {
+              bat._weightInGrams = parseFloat(w) * 453.592;
+            } else {
+              bat._weightInGrams = parseFloat(w);
+            }
+            delete bat._weight;
+            migrated = true;
+          }
+        });
+        if (migrated) triggerSave();
       }
     }
     
+    updateUnitToggleUI();
     renderTabs();
     populateTable();
     setStatus('Synced', 'bg-brand');
@@ -392,19 +453,45 @@ document.addEventListener('input', e => {
   }
 });
 
-addBatBtn.addEventListener('click', () => {
-  const newBatName = prompt("Enter new bat name:");
-  if (newBatName && newBatName.trim()) {
-    const name = newBatName.trim();
+function openAddBatModal() {
+  newBatNameInput.value = '';
+  newBatWeightInput.value = '';
+  addBatModal.classList.remove('opacity-0', 'pointer-events-none');
+  addBatModalContent.classList.remove('scale-90');
+  addBatModalContent.classList.add('scale-100');
+  setTimeout(() => newBatNameInput.focus(), 100);
+}
+
+function closeAddBatModal() {
+  addBatModal.classList.add('opacity-0', 'pointer-events-none');
+  addBatModalContent.classList.remove('scale-100');
+  addBatModalContent.classList.add('scale-90');
+}
+
+addBatBtn.addEventListener('click', openAddBatModal);
+
+cancelAddBatBtn.addEventListener('click', closeAddBatModal);
+
+confirmAddBatBtn.addEventListener('click', () => {
+  const name = newBatNameInput.value.trim();
+  const weightVal = parseFloat(newBatWeightInput.value);
+  
+  if (name) {
     if (!appData.bats[name]) {
       appData.bats[name] = {};
+      if (!isNaN(weightVal)) {
+        appData.bats[name]._weightInGrams = weightUnit === 'lbs' ? weightVal * 453.592 : weightVal;
+      }
       appData.lastEdited = name;
       renderTabs();
       populateTable();
       triggerSave();
+      closeAddBatModal();
     } else {
       alert("A bat with this name already exists.");
     }
+  } else {
+    alert("Please enter a bat name.");
   }
 });
 
@@ -762,3 +849,78 @@ function registerKnock() {
   
   triggerSave(); // Save partial counts and totals
 }
+
+let batBeingEdited = null;
+
+function openEditBatModal(batName) {
+  batBeingEdited = batName;
+  const batData = appData.bats[batName] || {};
+  editBatNameInput.value = batName;
+  if (batData._weightInGrams) {
+    if (weightUnit === 'lbs') {
+      editBatWeightInput.value = (batData._weightInGrams / 453.592).toFixed(2);
+    } else {
+      editBatWeightInput.value = Math.round(batData._weightInGrams);
+    }
+  } else {
+    editBatWeightInput.value = '';
+  }
+  
+  editBatModal.classList.remove('opacity-0', 'pointer-events-none');
+  editBatModalContent.classList.remove('scale-90');
+  editBatModalContent.classList.add('scale-100');
+  setTimeout(() => editBatNameInput.focus(), 100);
+}
+
+function closeEditBatModal() {
+  editBatModal.classList.add('opacity-0', 'pointer-events-none');
+  editBatModalContent.classList.remove('scale-100');
+  editBatModalContent.classList.add('scale-90');
+  batBeingEdited = null;
+}
+
+cancelEditBatBtn.addEventListener('click', closeEditBatModal);
+
+confirmEditBatBtn.addEventListener('click', () => {
+  if (!batBeingEdited) return;
+  
+  const newName = editBatNameInput.value.trim();
+  const weightVal = parseFloat(editBatWeightInput.value);
+  
+  if (!newName) {
+    alert("Please enter a bat name.");
+    return;
+  }
+  
+  if (newName !== batBeingEdited && appData.bats[newName]) {
+    alert("A bat with this name already exists.");
+    return;
+  }
+  
+  // If name changed, move the data
+  if (newName !== batBeingEdited) {
+    appData.bats[newName] = appData.bats[batBeingEdited];
+    delete appData.bats[batBeingEdited];
+    
+    if (appData.lockedBats && appData.lockedBats[batBeingEdited]) {
+      appData.lockedBats[newName] = appData.lockedBats[batBeingEdited];
+      delete appData.lockedBats[batBeingEdited];
+    }
+
+    if (appData.lastEdited === batBeingEdited) {
+      appData.lastEdited = newName;
+    }
+  }
+  
+  // Update weight
+  if (!isNaN(weightVal)) {
+    appData.bats[newName]._weightInGrams = weightUnit === 'lbs' ? weightVal * 453.592 : weightVal;
+  } else {
+    delete appData.bats[newName]._weightInGrams;
+  }
+  
+  renderTabs();
+  populateTable();
+  triggerSave();
+  closeEditBatModal();
+});
