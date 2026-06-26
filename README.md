@@ -33,10 +33,10 @@ This application is built for cricket bat makers, players, or enthusiasts who wa
 - **Export to PDF (`.pdf`)**: Generate a clean, styled PDF document summarizing all knocks.
 - **Export to Excel (`.xlsx`)**: Export the raw data into an Excel spreadsheet for your own record keeping or analysis.
 
-### 6. 🎨 Dual Themes (Neumorphic & Lumix)
+### 6. 🎨 Dual Themes (Neumorphic Design)
 - Features a highly responsive, modern interface powered by Tailwind CSS with custom styling.
-- **Light Theme (Neumorphism)**: A sleek, physical design where elements are softly extruded from or pressed into a bright, unified background using complex inner and outer shadows.
-- **Dark Theme (Lumix Glass)**: A high-contrast, glowing neon UI that perfectly pops against a deep dark background.
+- **Light Theme (Bright Neumorphic)**: A sleek, physical design where elements are softly extruded from or pressed into a bright, unified background using complex inner and outer shadows.
+- **Dark Theme (Dark Neumorphic)**: A stealthy, high-contrast adaptation of the neumorphic physical aesthetic, featuring deep dark backgrounds and glowing neon accents.
 - **Custom Dropdowns**: Native selects have been completely replaced with animated, themed dropdown menus.
 
 ---
