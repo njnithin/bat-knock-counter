@@ -21,6 +21,72 @@ const themeDropdownMenu = document.getElementById('themeDropdownMenu');
 const themeSelectorLabel = document.getElementById('themeSelectorLabel');
 const themeSelectorArrow = document.getElementById('themeSelectorArrow');
 const themeOptions = document.querySelectorAll('.theme-option');
+
+// Custom Alert Modal Override
+const customAlertModal = document.getElementById('customAlertModal');
+const customAlertModalContent = document.getElementById('customAlertModalContent');
+const customAlertMessage = document.getElementById('customAlertMessage');
+const customAlertOkBtn = document.getElementById('customAlertOkBtn');
+
+window.alert = function(message) {
+  if (customAlertMessage) customAlertMessage.textContent = message;
+  if (customAlertModal) customAlertModal.classList.remove('opacity-0', 'pointer-events-none');
+  if (customAlertModalContent) {
+    customAlertModalContent.classList.remove('scale-90');
+    customAlertModalContent.classList.add('scale-100');
+  }
+};
+
+if (customAlertOkBtn) {
+  customAlertOkBtn.addEventListener('click', () => {
+    if (customAlertModal) customAlertModal.classList.add('opacity-0', 'pointer-events-none');
+    if (customAlertModalContent) {
+      customAlertModalContent.classList.remove('scale-100');
+      customAlertModalContent.classList.add('scale-90');
+    }
+  });
+}
+
+// Custom Confirm Modal Override
+const customConfirmModal = document.getElementById('customConfirmModal');
+const customConfirmModalContent = document.getElementById('customConfirmModalContent');
+const customConfirmMessage = document.getElementById('customConfirmMessage');
+const customConfirmOkBtn = document.getElementById('customConfirmOkBtn');
+const customConfirmCancelBtn = document.getElementById('customConfirmCancelBtn');
+
+window.confirmAsync = function(message) {
+  return new Promise((resolve) => {
+    if (customConfirmMessage) customConfirmMessage.textContent = message;
+    if (customConfirmModal) customConfirmModal.classList.remove('opacity-0', 'pointer-events-none');
+    if (customConfirmModalContent) {
+      customConfirmModalContent.classList.remove('scale-90');
+      customConfirmModalContent.classList.add('scale-100');
+    }
+    
+    const handleOk = () => {
+      cleanup();
+      resolve(true);
+    };
+    
+    const handleCancel = () => {
+      cleanup();
+      resolve(false);
+    };
+    
+    const cleanup = () => {
+      customConfirmOkBtn.removeEventListener('click', handleOk);
+      customConfirmCancelBtn.removeEventListener('click', handleCancel);
+      if (customConfirmModal) customConfirmModal.classList.add('opacity-0', 'pointer-events-none');
+      if (customConfirmModalContent) {
+        customConfirmModalContent.classList.remove('scale-100');
+        customConfirmModalContent.classList.add('scale-90');
+      }
+    };
+    
+    customConfirmOkBtn.addEventListener('click', handleOk);
+    customConfirmCancelBtn.addEventListener('click', handleCancel);
+  });
+};
 const muscleModal = document.getElementById('muscleModal');
 const muscleMessage = document.getElementById('muscleMessage');
 
@@ -77,7 +143,29 @@ if (unitBtnLbs) unitBtnLbs.addEventListener('click', () => {
 const micToggleBtn = document.getElementById('micToggleBtn');
 const micSensitivity = document.getElementById('micSensitivity');
 const liveKnockCountEl = document.getElementById('liveKnockCount');
-const autoSwitchToggle = document.getElementById('autoSwitchToggle');
+const autoSwitchBtnOff = document.getElementById('autoSwitchBtnOff');
+const autoSwitchBtnOn = document.getElementById('autoSwitchBtnOn');
+let isAutoSwitchOn = false;
+
+function updateAutoSwitchUI() {
+  if (isAutoSwitchOn) {
+    if (autoSwitchBtnOn) autoSwitchBtnOn.className = 'px-3 py-1 text-[11px] font-bold rounded-full transition-all bg-brand text-brand-contrast neu-shadow border-transparent border';
+    if (autoSwitchBtnOff) autoSwitchBtnOff.className = 'px-3 py-1 text-[11px] font-bold rounded-full transition-all text-on-surface-variant hover:text-on-surface border-transparent border';
+  } else {
+    if (autoSwitchBtnOff) autoSwitchBtnOff.className = 'px-3 py-1 text-[11px] font-bold rounded-full transition-all bg-brand text-brand-contrast neu-shadow border-transparent border';
+    if (autoSwitchBtnOn) autoSwitchBtnOn.className = 'px-3 py-1 text-[11px] font-bold rounded-full transition-all text-on-surface-variant hover:text-on-surface border-transparent border';
+  }
+}
+
+if (autoSwitchBtnOff) autoSwitchBtnOff.addEventListener('click', () => {
+  isAutoSwitchOn = false;
+  updateAutoSwitchUI();
+});
+
+if (autoSwitchBtnOn) autoSwitchBtnOn.addEventListener('click', () => {
+  isAutoSwitchOn = true;
+  updateAutoSwitchUI();
+});
 
 let modalTimeout;
 
@@ -164,9 +252,13 @@ function applyLockState() {
     micToggleBtn.disabled = true;
     micToggleBtn.style.opacity = '0.5';
     micToggleBtn.title = "Recording disabled while bat is locked";
+    micToggleBtn.classList.add('hidden');
+    const recordingSettings = document.getElementById('recordingSettings');
+    if (recordingSettings) recordingSettings.classList.add('hidden');
     
     resetBatBtn.disabled = true;
     resetBatBtn.style.opacity = '0.5';
+    resetBatBtn.classList.add('hidden');
     inputs.forEach(el => el.disabled = true);
     btns.forEach(el => { el.disabled = true; el.style.opacity = '0.5'; });
     radios.forEach(el => el.disabled = true);
@@ -182,9 +274,13 @@ function applyLockState() {
     micToggleBtn.disabled = false;
     micToggleBtn.style.opacity = '1';
     micToggleBtn.title = "Start/Stop Knock Detection";
+    micToggleBtn.classList.remove('hidden');
+    const recordingSettings = document.getElementById('recordingSettings');
+    if (recordingSettings) recordingSettings.classList.remove('hidden');
     
     resetBatBtn.disabled = false;
     resetBatBtn.style.opacity = '1';
+    resetBatBtn.classList.remove('hidden');
     inputs.forEach(el => el.disabled = false);
     btns.forEach(el => { el.disabled = false; el.style.opacity = '1'; });
     radios.forEach(el => el.disabled = false);
@@ -199,18 +295,18 @@ function initTable() {
     row.dataset.portion = portion;
     row.className = 'data-row transition-colors group';
     row.innerHTML = `
-      <td class="py-3 px-2 md:px-6 text-center">
+      <td class="py-3 px-4 md:px-6 text-center">
         <input type="radio" name="targetPortion" class="target-radio form-radio text-brand rounded-full border-transparent focus:ring-brand focus:ring-offset-surface-container-low h-5 w-5 cursor-pointer radio-neu" value="${portion}" ${portion === portions[0] ? 'checked' : ''}>
       </td>
-      <td class="py-3 px-2 md:px-6 text-body-md font-semibold text-on-surface">${portion}</td>
-      <td class="py-3 px-2 md:px-6">
+      <td class="py-3 px-4 md:px-6 text-body-md font-semibold text-on-surface">${portion}</td>
+      <td class="py-3 px-4 md:px-6">
         <div class="flex items-center justify-center gap-3">
           <button class="counter-btn minus w-10 h-10 rounded-xl bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors neu-shadow-sm active:neu-shadow-inset-sm"><span class="material-symbols-outlined text-sm pointer-events-none">remove</span></button>
           <input type="number" class="counter-input w-16 h-12 bg-surface-container-high rounded-xl text-center text-[20px] text-on-surface font-bold neu-shadow-inset border-transparent border" value="0" min="0" data-portion="${portion}">
           <button class="counter-btn plus w-10 h-10 rounded-xl bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors neu-shadow-sm active:neu-shadow-inset-sm"><span class="material-symbols-outlined text-sm pointer-events-none">add</span></button>
         </div>
       </td>
-      <td class="row-total py-3 px-2 md:px-6 text-right text-body-md text-brand font-semibold">0</td>
+      <td class="row-total py-3 px-4 md:px-6 text-right text-body-md text-brand font-semibold">0</td>
     `;
     tableBody.appendChild(row);
   });
@@ -244,7 +340,7 @@ function renderTabs() {
       `}
     `;
 
-    tab.onclick = (e) => {
+    tab.onclick = async (e) => {
       if (e.target.classList.contains('edit-bat')) {
         openEditBatModal(batName);
         return;
@@ -255,7 +351,7 @@ function renderTabs() {
           alert("You must have at least one bat.");
           return;
         }
-        if (confirm(`Are you sure you want to delete "${batName}"?`)) {
+        if (await window.confirmAsync(`Are you sure you want to delete "${batName}"?`)) {
           delete appData.bats[batName];
           if (appData.lockedBats) delete appData.lockedBats[batName];
           if (appData.lastEdited === batName) {
@@ -411,11 +507,49 @@ const userProfile = document.getElementById('userProfile');
 const userName = document.getElementById('userName');
 const userAvatar = document.getElementById('userAvatar');
 const logoutBtn = document.getElementById('logoutBtn');
-const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
-const authLoadingOverlay = document.getElementById('authLoadingOverlay');
+
+// Profile Dropdown Logic
+const profileSelectorBtn = document.getElementById('profileSelectorBtn');
+const profileDropdownMenu = document.getElementById('profileDropdownMenu');
+const profileSelectorArrow = document.getElementById('profileSelectorArrow');
+let isProfileDropdownOpen = false;
+
+function toggleProfileDropdown() {
+  isProfileDropdownOpen = !isProfileDropdownOpen;
+  if (isProfileDropdownOpen) {
+    if (profileDropdownMenu) {
+      profileDropdownMenu.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+      profileDropdownMenu.classList.add('opacity-100', 'pointer-events-auto', 'scale-100', 'flex');
+    }
+    if (profileSelectorArrow) profileSelectorArrow.classList.add('rotate-180');
+  } else {
+    if (profileDropdownMenu) {
+      profileDropdownMenu.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+      profileDropdownMenu.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+      setTimeout(() => profileDropdownMenu && profileDropdownMenu.classList.remove('flex'), 200);
+    }
+    if (profileSelectorArrow) profileSelectorArrow.classList.remove('rotate-180');
+  }
+}
+
+if (profileSelectorBtn) {
+  profileSelectorBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleProfileDropdown();
+  });
+}
+
+document.addEventListener('click', (e) => {
+  if (isProfileDropdownOpen && userProfile && !userProfile.contains(e.target)) {
+    toggleProfileDropdown();
+  }
+});
 
 if (loginBtn) {
   loginBtn.addEventListener('click', () => {
+    if (window.isListening && typeof stopListening === 'function') {
+      stopListening();
+    }
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (isMobile) {
       // Mobile browsers often block popups. Use redirect instead.
@@ -432,11 +566,11 @@ if (loginBtn) {
 }
 
 const handleLogout = () => {
+  if (isProfileDropdownOpen) toggleProfileDropdown();
   firebaseAuth.signOut();
 };
 
 if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
-if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', handleLogout);
 
 function subscribeToData() {
   if (!currentUser) return;
@@ -487,6 +621,13 @@ function subscribeToData() {
       triggerSave(); // create doc
     }
     setStatus('Cloud Sync', 'bg-brand');
+    
+    // Hide skeletons now that sync is complete
+    const skeletonOverlays = document.querySelectorAll('.skeleton-overlay');
+    skeletonOverlays.forEach(overlay => {
+      overlay.classList.add('opacity-0', 'pointer-events-none');
+      setTimeout(() => overlay.remove(), 300);
+    });
   }, error => {
     console.error('Firestore listener error:', error);
     setStatus('Sync Failed', 'bg-red-500');
@@ -603,9 +744,9 @@ confirmAddBatBtn.addEventListener('click', () => {
   }
 });
 
-resetBatBtn.addEventListener('click', () => {
+resetBatBtn.addEventListener('click', async () => {
   const currentBat = appData.lastEdited;
-  if (confirm(`Are you sure you want to reset all counters for "${currentBat}" to 0?`)) {
+  if (await window.confirmAsync(`Are you sure you want to reset all counters for "${currentBat}" to 0?`)) {
     portions.forEach(portion => {
       if (!appData.bats[currentBat]) appData.bats[currentBat] = {};
       appData.bats[currentBat][portion] = 0;
@@ -761,7 +902,11 @@ firebaseAuth.getRedirectResult().catch(err => {
 });
 
 firebaseAuth.onAuthStateChanged(user => {
-  if (authLoadingOverlay) authLoadingOverlay.classList.add('opacity-0', 'pointer-events-none');
+  const authLoadingOverlay = document.getElementById('authLoadingOverlay');
+  if (authLoadingOverlay) {
+    authLoadingOverlay.classList.add('opacity-0', 'pointer-events-none');
+    document.body.classList.remove('overflow-hidden');
+  }
   
   if (user) {
     currentUser = user;
@@ -786,6 +931,13 @@ firebaseAuth.onAuthStateChanged(user => {
     renderTabs();
     populateTable();
     setStatus('Offline (Logged Out)', 'bg-yellow-400');
+    
+    // Hide skeletons since we're offline
+    const skeletonOverlays = document.querySelectorAll('.skeleton-overlay');
+    skeletonOverlays.forEach(overlay => {
+      overlay.classList.add('opacity-0', 'pointer-events-none');
+      setTimeout(() => overlay.remove(), 300);
+    });
   }
 });
 
@@ -941,7 +1093,7 @@ function registerKnock() {
     liveKnockCountEl.value = 0;
     
     // Auto-switch logic
-    if (autoSwitchToggle.checked) {
+    if (isAutoSwitchOn) {
       const currentIndex = portions.indexOf(targetPortion);
       let nextIndex = currentIndex + 1;
       if (nextIndex >= portions.length) nextIndex = 0;
