@@ -1,0 +1,13 @@
+{
+  "projects": {},
+  "targets": {
+    "bat-knock-counter": {
+      "hosting": {
+        "batknockpro": [
+          "batknockpro"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
