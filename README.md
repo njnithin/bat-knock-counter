@@ -15,6 +15,8 @@ This application is built for cricket bat makers, players, or enthusiasts who wa
 
 ### 2. 🎙️ Auto Knock Detection
 - **Microphone Integration**: Built-in support to listen for physical knocks using your microphone.
+- **Acoustic 'Sweet Spot' Analysis**: Real-time Fast Fourier Transform (FFT) analysis visualizes the audio waveform and determines the "Ping Quality" based on the bat's resonant frequency. It intelligently filters out human speech and accurately identifies Sweet Spot (>1200Hz), Solid Contact (>600Hz), and Edge/Toe hits.
+- **Wake Lock Support**: Automatically prevents your device screen from sleeping or dimming while recording so you don't miss a single knock.
 - **Sensitivity Slider**: Adjust how loud a knock needs to be to register, using a custom physical-groove style slider.
 - **Visual Feedback**: The targeted row flashes dynamically instantly upon detecting a knock.
 - **Live Counter**: A live partial counter tracks knocks as they happen. You can manually edit this counter on the fly to correct any miscounts.

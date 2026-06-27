@@ -252,9 +252,8 @@ function applyLockState() {
     micToggleBtn.disabled = true;
     micToggleBtn.style.opacity = '0.5';
     micToggleBtn.title = "Recording disabled while bat is locked";
-    micToggleBtn.classList.add('hidden');
-    const recordingSettings = document.getElementById('recordingSettings');
-    if (recordingSettings) recordingSettings.classList.add('hidden');
+    const telemetryControlsPanel = document.getElementById('telemetryControlsPanel');
+    if (telemetryControlsPanel) telemetryControlsPanel.classList.add('hidden');
     
     resetBatBtn.disabled = true;
     resetBatBtn.style.opacity = '0.5';
@@ -274,9 +273,8 @@ function applyLockState() {
     micToggleBtn.disabled = false;
     micToggleBtn.style.opacity = '1';
     micToggleBtn.title = "Start/Stop Knock Detection";
-    micToggleBtn.classList.remove('hidden');
-    const recordingSettings = document.getElementById('recordingSettings');
-    if (recordingSettings) recordingSettings.classList.remove('hidden');
+    const telemetryControlsPanel = document.getElementById('telemetryControlsPanel');
+    if (telemetryControlsPanel) telemetryControlsPanel.classList.remove('hidden');
     
     resetBatBtn.disabled = false;
     resetBatBtn.style.opacity = '1';
@@ -947,6 +945,11 @@ let audioContext;
 let analyser;
 let microphone;
 let knockDebounceTimer = 0;
+let canvasCtx;
+let wakeLock = null;
+
+const acousticTelemetrySection = document.getElementById('acousticTelemetrySection');
+const waveformCanvas = document.getElementById('waveformCanvas');
 
 function getPartialCount(portion) {
   const currentBat = appData.lastEdited;
@@ -998,6 +1001,13 @@ async function startListening() {
     
     updateLiveCountDisplay();
     liveKnockCountEl.classList.remove('hidden');
+    if (acousticTelemetrySection) {
+      acousticTelemetrySection.classList.remove('hidden');
+      acousticTelemetrySection.classList.add('flex');
+    }
+    if (waveformCanvas) {
+      canvasCtx = waveformCanvas.getContext('2d');
+    }
 
     window.isListening = true;
     micToggleBtn.innerHTML = `
@@ -1006,22 +1016,50 @@ async function startListening() {
     `;
     
     detectKnock();
+    
+    // Request Wake Lock to prevent screen from sleeping on mobile devices
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLock = await navigator.wakeLock.request('screen');
+      }
+    } catch (err) {
+      console.error(`Wake Lock error: ${err.name}, ${err.message}`);
+    }
+    
   } catch (err) {
     console.error('Error accessing microphone:', err);
     alert('Microphone access is required for auto knock detection.');
   }
 }
 
+// Re-acquire wake lock if visibility changes (e.g. user minimized and returned to app)
+document.addEventListener('visibilitychange', async () => {
+  if (wakeLock !== null && document.visibilityState === 'visible' && window.isListening) {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+    } catch (err) {
+      console.error(`Wake Lock error on visibility change: ${err.name}, ${err.message}`);
+    }
+  }
+});
+
 function stopListening() {
   window.isListening = false;
   if (audioContext && audioContext.state !== 'closed') {
     audioContext.close();
+  }
+  if (wakeLock !== null) {
+    wakeLock.release().catch(console.error).finally(() => { wakeLock = null; });
   }
   micToggleBtn.innerHTML = `
       <span class="material-symbols-outlined text-[18px]">sports_cricket</span>
       <span id="micToggleText">Record Knock</span>
   `;
   liveKnockCountEl.classList.add('hidden');
+  if (acousticTelemetrySection) {
+    acousticTelemetrySection.classList.add('hidden');
+    acousticTelemetrySection.classList.remove('flex');
+  }
 }
 
 micToggleBtn.addEventListener('click', () => {
@@ -1038,6 +1076,40 @@ function detectKnock() {
   const dataArray = new Uint8Array(analyser.fftSize);
   analyser.getByteTimeDomainData(dataArray);
 
+  // Render Waveform
+  if (canvasCtx && waveformCanvas) {
+    const width = waveformCanvas.clientWidth;
+    const height = waveformCanvas.clientHeight;
+    
+    if (waveformCanvas.width !== width) waveformCanvas.width = width;
+    if (waveformCanvas.height !== height) waveformCanvas.height = height;
+    
+    canvasCtx.clearRect(0, 0, width, height);
+    canvasCtx.lineWidth = 2;
+    // Get CSS variable for brand color
+    const brandColor = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#d4ff37';
+    canvasCtx.strokeStyle = brandColor;
+    canvasCtx.beginPath();
+    
+    const sliceWidth = width * 1.0 / dataArray.length;
+    let x = 0;
+    
+    for (let i = 0; i < dataArray.length; i++) {
+      const v = dataArray[i] / 128.0;
+      const y = v * height / 2;
+      
+      if (i === 0) {
+        canvasCtx.moveTo(x, y);
+      } else {
+        canvasCtx.lineTo(x, y);
+      }
+      x += sliceWidth;
+    }
+    
+    canvasCtx.lineTo(width, height / 2);
+    canvasCtx.stroke();
+  }
+
   let maxAmplitude = 0;
   for (let i = 0; i < dataArray.length; i++) {
     const amplitude = Math.abs(dataArray[i] - 128);
@@ -1053,12 +1125,64 @@ function detectKnock() {
 
   const now = Date.now();
   if (maxAmplitude > threshold && (now - knockDebounceTimer > 300)) {
-    // Knock detected!
-    knockDebounceTimer = now;
-    registerKnock();
+    const peakFreq = getPeakFrequency();
+    
+    // Filter out human speech and low-frequency noise. Bat knocks typically resonate > 400Hz.
+    if (peakFreq > 350) {
+      knockDebounceTimer = now;
+      updatePingQualityUI(peakFreq);
+      registerKnock();
+    }
   }
 
   requestAnimationFrame(detectKnock);
+}
+
+function getPeakFrequency() {
+  if (!analyser || !audioContext) return 0;
+  const freqData = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(freqData);
+  
+  let maxEnergy = 0;
+  let maxIndex = 0;
+  for (let i = 0; i < freqData.length; i++) {
+    if (freqData[i] > maxEnergy) {
+      maxEnergy = freqData[i];
+      maxIndex = i;
+    }
+  }
+  
+  const nyquist = audioContext.sampleRate / 2;
+  const binWidth = nyquist / analyser.frequencyBinCount;
+  return Math.round(maxIndex * binWidth);
+}
+
+function updatePingQualityUI(peakFreq) {
+  const freqDisplay = document.getElementById('pingFreqDisplay');
+  const descDisplay = document.getElementById('pingDescDisplay');
+  const badge = document.getElementById('pingQualityBadge');
+  
+  if (freqDisplay) freqDisplay.textContent = `Peak Freq: ${peakFreq} Hz`;
+  
+  if (peakFreq > 1200) {
+    if (badge) {
+      badge.textContent = "Excellent";
+      badge.className = "px-3 py-1 text-[11px] font-bold rounded-full bg-[#4caf50]/20 text-[#4caf50] neu-shadow-inset-sm transition-colors duration-300";
+    }
+    if (descDisplay) descDisplay.textContent = "Sweet Spot Hit!";
+  } else if (peakFreq > 600) {
+    if (badge) {
+      badge.textContent = "Good";
+      badge.className = "px-3 py-1 text-[11px] font-bold rounded-full bg-[#ff9800]/20 text-[#ff9800] neu-shadow-inset-sm transition-colors duration-300";
+    }
+    if (descDisplay) descDisplay.textContent = "Solid Contact";
+  } else {
+    if (badge) {
+      badge.textContent = "Poor";
+      badge.className = "px-3 py-1 text-[11px] font-bold rounded-full bg-[#f44336]/20 text-[#f44336] neu-shadow-inset-sm transition-colors duration-300";
+    }
+    if (descDisplay) descDisplay.textContent = "Edge / Toe Hit";
+  }
 }
 
 function registerKnock() {
