@@ -13,3 +13,6 @@ notes.md
 
 # Ignore sensitive Firebase config
 components/js/firebase-config.js
+
+# Firebase cache
+.firebase/
