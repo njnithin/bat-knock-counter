@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "batknockpro",
     "public": ".",
     "ignore": [
       "firebase.json",
