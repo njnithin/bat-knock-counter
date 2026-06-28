@@ -178,3 +178,23 @@ input[type=number] {
   border-color: transparent !important;
   --tw-ring-shadow: 0 0 transparent !important;
 }
+
+/* Wave Progress Animation */
+@keyframes waveScroll {
+  from { -webkit-mask-position: 0 center; mask-position: 0 center; }
+  to { -webkit-mask-position: -40px center; mask-position: -40px center; }
+}
+.wave-progress {
+  background-color: var(--brand);
+  background-image: none !important;
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg width="40" height="10" viewBox="0 0 40 10" xmlns="http://www.w3.org/2000/svg"><path d="M 0 5 Q 10 10 20 5 T 40 5" fill="none" stroke="black" stroke-width="4" stroke-linecap="round"/></svg>');
+  mask-image: url('data:image/svg+xml;utf8,<svg width="40" height="10" viewBox="0 0 40 10" xmlns="http://www.w3.org/2000/svg"><path d="M 0 5 Q 10 10 20 5 T 40 5" fill="none" stroke="black" stroke-width="4" stroke-linecap="round"/></svg>');
+  -webkit-mask-repeat: repeat-x;
+  mask-repeat: repeat-x;
+  -webkit-mask-position: 0 center;
+  mask-position: 0 center;
+  -webkit-mask-size: 40px 100%;
+  mask-size: 40px 100%;
+  animation: waveScroll 1s linear infinite;
+  border-radius: 0 !important;
+}

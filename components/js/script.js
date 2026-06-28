@@ -159,11 +159,21 @@ function updateAutoSwitchUI() {
 
 if (autoSwitchBtnOff) autoSwitchBtnOff.addEventListener('click', () => {
   isAutoSwitchOn = false;
+  const currentBat = appData.lastEdited;
+  if (appData.bats[currentBat]) {
+    appData.bats[currentBat]._isAutoSwitchOn = false;
+    triggerSave();
+  }
   updateAutoSwitchUI();
 });
 
 if (autoSwitchBtnOn) autoSwitchBtnOn.addEventListener('click', () => {
   isAutoSwitchOn = true;
+  const currentBat = appData.lastEdited;
+  if (appData.bats[currentBat]) {
+    appData.bats[currentBat]._isAutoSwitchOn = true;
+    triggerSave();
+  }
   updateAutoSwitchUI();
 });
 
@@ -350,6 +360,9 @@ function renderTabs() {
           return;
         }
         if (await window.confirmAsync(`Are you sure you want to delete "${batName}"?`)) {
+          if (window.aiDetector) {
+            window.aiDetector.deleteModelForBat(batName);
+          }
           delete appData.bats[batName];
           if (appData.lockedBats) delete appData.lockedBats[batName];
           if (appData.lastEdited === batName) {
@@ -478,6 +491,10 @@ function populateTable() {
   }
 
   applyLockState();
+  
+  if (window.aiDetector) {
+    window.aiDetector.loadModelForBat(currentBat);
+  }
   updateTotals(true);
 }
 
@@ -989,11 +1006,21 @@ liveKnockCountEl.addEventListener('input', (e) => {
   }
 });
 
+// Save sensitivity changes per bat
+micSensitivity.addEventListener('change', (e) => {
+  const currentBat = appData.lastEdited;
+  if (appData.bats[currentBat]) {
+    appData.bats[currentBat]._sensitivity = e.target.value;
+    triggerSave();
+  }
+});
+
 async function startListening() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     analyser = audioContext.createAnalyser();
+    window.analyser = analyser;
     microphone = audioContext.createMediaStreamSource(stream);
     
     analyser.fftSize = 512;
@@ -1047,7 +1074,11 @@ function stopListening() {
   window.isListening = false;
   if (audioContext && audioContext.state !== 'closed') {
     audioContext.close();
+    microphone = null;
   }
+  
+  window.analyser = null;
+
   if (wakeLock !== null) {
     wakeLock.release().catch(console.error).finally(() => { wakeLock = null; });
   }
@@ -1124,14 +1155,48 @@ function detectKnock() {
   const threshold = Math.max(10, 128 - (sensitivityValue * 1.2)); 
 
   const now = Date.now();
-  if (maxAmplitude > threshold && (now - knockDebounceTimer > 300)) {
-    const peakFreq = getPeakFrequency();
-    
-    // Filter out human speech and low-frequency noise. Bat knocks typically resonate > 400Hz.
-    if (peakFreq > 350) {
-      knockDebounceTimer = now;
-      updatePingQualityUI(peakFreq);
-      registerKnock();
+  if (now - knockDebounceTimer > 300) {
+    if (window.aiDetector && window.aiDetector.isSmartModeEnabled && window.aiDetector.isModelLoaded) {
+      if (window.isPredicting) {
+        requestAnimationFrame(detectKnock);
+        return;
+      }
+      window.isPredicting = true;
+      
+      // AI Smart Mode Logic
+      const freqData = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(freqData);
+      
+      window.aiDetector.predict(freqData).then(result => {
+        window.isPredicting = false;
+        if (result && result.isKnock) {
+          knockDebounceTimer = Date.now();
+          const peakFreq = getPeakFrequency();
+          updatePingQualityUI(peakFreq);
+          registerKnock();
+          
+          // Flash the UI for AI knock
+          const badge = document.getElementById('pingQualityBadge');
+          if (badge) {
+            badge.textContent = `AI Confidence: ${(result.confidence * 100).toFixed(0)}%`;
+            badge.className = "px-3 py-1 text-[11px] font-bold rounded-full bg-brand/20 text-brand neu-shadow-inset-sm transition-colors duration-300";
+          }
+        }
+      }).catch(err => {
+        window.isPredicting = false;
+        console.error(err);
+      });
+    } else {
+      // Fallback: Old amplitude & frequency threshold logic
+      if (maxAmplitude > threshold) {
+        const peakFreq = getPeakFrequency();
+        // Filter out human speech and low-frequency noise. Bat knocks typically resonate > 400Hz.
+        if (peakFreq > 350) {
+          knockDebounceTimer = now;
+          updatePingQualityUI(peakFreq);
+          registerKnock();
+        }
+      }
     }
   }
 

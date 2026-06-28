@@ -1,4 +1,4 @@
-# Bat Knock Counter v2.0.0
+# Bat Knock Counter v2.2.0-beta.1
 
 Welcome to the **Bat Knock Counter**, a comprehensive tool for tracking, managing, and automating bat knocks with professional telemetry and a stunning modern UI!
 
@@ -15,6 +15,7 @@ This application is built for cricket bat makers, players, or enthusiasts who wa
 
 ### 2. 🎙️ Auto Knock Detection
 - **Microphone Integration**: Built-in support to listen for physical knocks using your microphone.
+- **AI Smart Mode (Beta)**: Uses TensorFlow.js to train a custom machine learning model locally on your specific bat. It learns the exact acoustic signature of your bat's knock versus ambient background noise for ultra-high accuracy recording.
 - **Acoustic 'Sweet Spot' Analysis**: Real-time Fast Fourier Transform (FFT) analysis visualizes the audio waveform and determines the "Ping Quality" based on the bat's resonant frequency. It intelligently filters out human speech and accurately identifies Sweet Spot (>1200Hz), Solid Contact (>600Hz), and Edge/Toe hits.
 - **Wake Lock Support**: Automatically prevents your device screen from sleeping or dimming while recording so you don't miss a single knock.
 - **Sensitivity Slider**: Adjust how loud a knock needs to be to register, using a custom physical-groove style slider.
@@ -57,7 +58,7 @@ This application is built for cricket bat makers, players, or enthusiasts who wa
 ---
 
 ## Technical Stack
-- **Frontend**: HTML5, Vanilla JavaScript, Tailwind CSS (via CDN), Canvas Confetti, SheetJS (xlsx), html2pdf, html2canvas.
+- **Frontend**: HTML5, Vanilla JavaScript, Tailwind CSS (via CDN), TensorFlow.js (AI), Canvas Confetti, SheetJS (xlsx), html2pdf, html2canvas.
 - **Backend & Auth**: Firebase Authentication (Google Auth) and Cloud Firestore for real-time NoSQL data syncing.
 
 ## Setup & Running Locally
